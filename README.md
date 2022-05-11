@@ -1,5 +1,5 @@
 # proj2
-*Here is a preliminary explanation of our Project, this document reflects (Proposal.md)[proj2-rosy-eeve/Proposal/Proposal.md]*
+*Here is a preliminary explanation of our Project, this document reflects [Proposal.md](proj2-rosy-eeve//Proposal/Proposal.md)*
 
 ## Introduction
 
