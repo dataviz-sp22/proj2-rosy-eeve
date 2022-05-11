@@ -103,12 +103,11 @@ interest.
 
 ## Repository Organization
 
-  - Data
+  - [Data](proj2-rosy-eeve/Data/README.md)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
-  - Presentation
-  - Proposal
-  - README.Rmd
-  - README.md
+  - [Presentation](proj2-rosy-eeve/Presentation/README.md)
+  - [Proposal](proj2-rosy-eeve/Proposal/README.md)
+  - [Write-up](proj2-rosy-eeve/README.md)
 
 ## Citations
