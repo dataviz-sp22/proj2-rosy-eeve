@@ -2,7 +2,7 @@
 title: "Proposal"
 author: "Kamran Ahmed, Kaylah Thomas, Thao Tran (Rosy Eeve)"
 date: "5/11/2022"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
