@@ -19,7 +19,7 @@ library(tigris)
 library(rgdal)
 library(purrr)
 library(sf)
-census_api_key()
+#census_api_key(account)
 
 ```
 
@@ -617,3 +617,45 @@ write_csv(Chi_acs2019_clean,"Chicago_zcta_subset_acs2019_clean.csv")
 ```
 
 
+##Build Codebook
+
+```{r}
+# Source: https://www.adrianbruegger.com/post/simple-codebook/, https://www.alexcernat.com/easy-way-to-make-a-codebook-in-r/
+library(haven)
+library(sjlabelled) # package to read and write item labels and values
+data <- read_csv("/Users/kaylah/OneDrive/School Documents/depression_data/Chicago_zcta_subset_acs2019_clean.csv")
+
+get_label(data)
+
+data <- set_label(data, c("Zipcode",
+                          "Tract",
+                          "Percent Estimate White",
+                          "Percent Estimate Black",
+                          "Percent Estimate American Indian and Alaska Native",
+                          "Percent Estimate Asian",
+                          "Percent Estimate Native Hawaiian and Other Pacific Islander",
+                          "Percent Estimate Hispanic",
+                          "Gini Inequality Index",
+                          "Median Household Income",
+                          "Percent Estimate Receiving Public Assitance",
+                          "Percent Estimate Not Receiving Public Assitance",
+                          "Percent Estimate Completed Less than Highschool Education",
+                          "Percent Estimate Completed A Bachelor's Degree or Higher",
+                          "Percent Estimate Under 18",
+                          "Percent Estimate 18 to 24",
+                          "Percent Estimate 25 to 34",
+                          "Percent Estimate 35 to 44",
+                          "Percent Estimate 45 to 54",
+                          "Percent Estimate 55 to 64",
+                          "Percent Estimate 65 to 74",
+                          "Percent Estimate 75 and over",
+                          "Percent Estimate Female",
+                          "Percent Estimate Male"))
+
+codebook <-enframe(get_label(data))
+classes <- data %>% sapply(class)
+codebook <- cbind(codebook, classes, deparse.level = 0, check.rows=FALSE)
+colnames(codebook) <- c("variable_id", "label", "class")
+rownames(codebook) <- NULL
+write.csv(codebook,file="ACS2019_codebook.csv", na="", row.names=FALSE)
+```
