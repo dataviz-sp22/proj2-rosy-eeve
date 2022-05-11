@@ -1,0 +1,619 @@
+---
+title: "ACS Dataset Building"
+author: "Kaylah Thomas (revised from Kate Schertz)"
+date: "2/20/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_knit$set(root.dir = "~/Box #Sync/Documents/MyOngoing/Crime&Greenspace/AnalysisForRevision/Chicago/")
+```
+
+
+
+```{r}
+library(tidycensus)
+library(tidyverse)
+library(tigris)
+library(rgdal)
+library(purrr)
+library(sf)
+census_api_key()
+
+```
+
+##Examine available variables
+
+```{r}
+# acs 2019
+
+v19 <- load_variables(2019, "acs5", cache = TRUE) # Check for relevant variables
+View(v19)
+```
+
+Variables needded from ACS 2019
+*Returns both Estimates and margin of error. Will indicate the total estimate for groups with parameter in get_acs()
+
+Total population: B02001_001
+One race-White: B02001_002
+One race-Black: B02001_003
+One race-American Indian or Alaska Native: B02001_004
+One race-Asian:B02001_005
+One race-Native Hawaiian: B02001_006
+One race-Other: B02001_007
+Two or more races:B02001_008
+Two races including Some other race: B02001_009
+Two races excluding Some other race, and three or more races:B02001_010
+Hispanic or Latino: B03001_003
+Not Hispanic or Latino: B03001_002
+Median Household income: B19013_001
+Gini Index: 19083_001
+Less than High School Education: B15003_002 to _016
+Bachelors or higher: B15003_021 to _025
+Total population for age measures: B01001_001
+Age range: (have to add male and female populations together)
+  Under 5 years: B01001_003 & B01001_027
+  5 to 9 years: B01001_004 & B01001_028
+  10 to 14 years: B01001_005 & B01001_029
+  15 to 17 years: B01001_006 & B01001_030
+  18 and 19 years: B01001_007 & B01001_031
+  20 years: B01001_008 & B01001_032
+  21 years: B01001_009 & B01001_033
+  22 to 24 years: B01001_010 & B01001_034
+  25 to 29 years: B01001_011 & B01001_035
+  30 to 34 years: B01001_012 & B01001_036
+  35 to 39 years: B01001_013 & B01001_037
+  40 to 44 years: B01001_014 & B01001_038
+  45 to 49 years: B01001_015 & B01001_039
+  50 to 54 years: B01001_016 & B01001_040
+  55 to 59 years: B01001_017 & B01001_041
+  60 and 61 years: B01001_018 & B01001_042
+  62 to 64 years: B01001_019 & B01001_043
+  65 and 66 years: B01001_020 & B01001_044
+  67 to 69 years: B01001_021 & B01001_045
+  70 to 74 years: B01001_022 & B01001_046
+  75 to 79 years: B01001_023 & B01001_047
+  80 to 84 years: B01001_024 & B01001_048
+  85 years and over: B01001_025 & B01001_049
+  * Aggregate all of these age variables to make 7 age ranges: under 18, 18-24, 25-34, 35-44, 45-54, 55-64, 65-74, over 75
+Gender: 
+  Total population: B01001_001
+  Female: B01001_026
+  Male: B01001_002
+  
+  
+Adjust age ranges to this? Also included in ACS measures find via B18106_025 (self care difficulty, possible factor to include. Should inclue geographical mobility in the past year measure?)
+5 to 17 year
+18 to 34 years
+35 to 64 years
+65 to 74 years
+75 years and over
+
+
+##Building Chicago MSA area as zipcodes
+
+```{r}
+# grabbing FIPS state and county codes for get_acs state and county inputs
+
+cbsa <- read.csv("/Users/kaylah/OneDrive/School Documents/depression_data/list1_Sep_2018.csv")
+
+state_cbsa <- unique(as.character(cbsa[cbsa$X.2 == 'Chicago-Naperville-Elgin, IL-IN-WI', 9]))
+
+county_cbsa <- unique(as.character(cbsa[cbsa$X.2 == 'Chicago-Naperville-Elgin, IL-IN-WI', 8]))
+
+# formattting for multi-city calls to get_acs()
+my_counties <- fips_codes %>%
+  filter(county %in% county_cbsa) %>%
+  filter(state_name %in% state_cbsa)
+
+```
+
+
+##ACS Variables of interest
+
+```{r}
+# Variables of Interest
+
+race_vars <- c(White = "B03002_003",
+               Black = "B03002_004",
+               Native = "B03002_005",
+               Asian = "B03002_006",
+               HIPI = "B03002_007",
+               Hispanic = "B03002_012")
+race_summ_var <- 'B03002_001'
+
+income_vars <- c(Gini = 'B19083_001', 
+                 Medinc = 'B19013_001')
+
+pub_asst_vars <- c(Pubasst = 'B19057_002', 
+                   NoPubasst = 'B19057_003')
+pub_asst_sum_var <- 'B19057_001'
+
+edu_vars <- c(LessHS1 = 'B15003_002',
+              LessHS2 = 'B15003_003',
+              LessHS3 = 'B15003_004',
+              LessHS4 = 'B15003_005',
+              LessHS5 = 'B15003_006',
+              LessHS6 = 'B15003_007',
+              LessHS7 = 'B15003_008',
+              LessHS8 = 'B15003_009',
+              LessHS9 = 'B15003_010',
+              LessHS10 = 'B15003_011',
+              LessHS11 = 'B15003_012',
+              LessHS12 = 'B15003_013',
+              LessHS13 = 'B15003_014',
+              LessHS14 = 'B15003_015',
+              LessHS15 = 'B15003_016',
+              College1 = 'B15003_021',
+              College2 = 'B15003_022',
+              College3 = 'B15003_023',
+              College4 = 'B15003_024',
+              College5 = 'B15003_025'
+              )
+edu_sum_var <- 'B15003_001'
+
+age_vars <- c(mUnder5 = 'B01001_003', 
+            fUnder5 = 'B01001_027',
+            m5t9 = 'B01001_004',
+            f5t9 = 'B01001_028',
+            m10t14 = 'B01001_005',
+            f10t14 = 'B01001_029',
+            m15t17 = 'B01001_006',
+            f15t17 = 'B01001_030',
+            m18t19 = 'B01001_007',
+            f18t19 = 'B01001_031',
+            m20 = 'B01001_008',
+            f20 = 'B01001_032',
+            m21 = 'B01001_009',
+            f21 = 'B01001_033',
+            m22t24 = 'B01001_010',
+            f22t24 = 'B01001_034',
+            m25t29 = 'B01001_011',
+            f25t29 = 'B01001_035',
+            m30t34 = 'B01001_012',
+            f30t34 = 'B01001_036',
+            m35t39 = 'B01001_013',
+            f35t39 = 'B01001_037',
+            m40t44 = 'B01001_014',
+            f40t44 = 'B01001_038',
+            m45t49 = 'B01001_015',
+            f45t49 = 'B01001_039',
+            m50t54 = 'B01001_016',
+            f50t54 = 'B01001_040',
+            m55t59 = 'B01001_017',
+            f55t59 = 'B01001_041',
+            m60t61 = 'B01001_018',
+            f60t61 = 'B01001_042',
+            m62t64 = 'B01001_019',
+            f62t64 = 'B01001_043',
+            m65t66 = 'B01001_020',
+            f65t66 = 'B01001_044',
+            m67t69 = 'B01001_021',
+            f67t69 = 'B01001_045',
+            m70t74 = 'B01001_022',
+            f70t74 = 'B01001_046',
+            m75t79 = 'B01001_023',
+            f75t79 = 'B01001_047',
+            m80t84 = 'B01001_024',
+            f80t84 = 'B01001_048',
+            m85over = 'B01001_025',
+            f85over = 'B01001_049')
+age_pop_tot <- 'B01001_001'
+
+gender_vars <- c(female = 'B01001_026',
+                 male = 'B01001_002')
+gender_tot <- 'B01001_001'
+```
+
+
+##Building dataset
+
+```{r}
+# Race Variables
+chi_cbsa_race <- map2_dfr(
+  my_counties$state_code, my_counties$county_code,
+  ~ get_acs(geography = "tract", state = .x, county = .y, 
+            variables = race_vars,
+            summary_var = race_summ_var,
+            year = 2019, 
+            output = "wide")
+  )
+
+chi_cbsa_race_sum <- chi_cbsa_race %>%
+  rowwise(GEOID) %>%
+  mutate(PEWhite = WhiteE/summary_est,
+         PEBlack = BlackE/summary_est,
+         PENative = NativeE/summary_est,
+         PEAsian = AsianE/summary_est,
+         PEHIPI = HIPIE/summary_est, 
+         PEHispanic = HispanicE/summary_est)
+chi_cbsa_race_sum <- chi_cbsa_race_sum %>% rename(RaceSum = summary_est, RaceMOE = summary_moe)
+
+
+# Income and Gini index Variables
+chi_cbsa_inc <- map2_dfr(
+  my_counties$state_code, my_counties$county_code,
+  ~ get_acs(geography = "tract", state = .x, county = .y, 
+            variables = income_vars,
+            year = 2019, 
+            output = "wide")
+  ) # Note: income variables have 17 (max) Nan values
+
+
+# Public Assitance Variables
+chi_cbsa_pubasst <- map2_dfr(
+  my_counties$state_code, my_counties$county_code,
+  ~ get_acs(geography = "tract", state = .x, county = .y, 
+            variables = pub_asst_vars,
+            summary_var = pub_asst_sum_var, 
+            year = 2019, 
+            output = "wide")
+  )
+
+chi_cbsa_pubasst_sum <- chi_cbsa_pubasst %>%
+  rowwise(GEOID) %>%
+  mutate(PEpubasst = PubasstE/summary_est,
+         PEnopubasst = NoPubasstE/summary_est)
+chi_cbsa_pubasst_sum <- chi_cbsa_pubasst_sum %>% rename(PubAsstSum = summary_est, PubAsstMOE = summary_moe)
+
+
+# Education variables
+chi_cbsa_edu <- map2_dfr(
+  my_counties$state_code, my_counties$county_code,
+  ~ get_acs(geography = "tract", state = .x, county = .y, 
+            variables = edu_vars,
+            summary_var = edu_sum_var, 
+            year = 2019, 
+            output = "wide")
+  )
+
+# Only have less than HS and bachelor or higher, can add complete highschool and some college vars 
+chi_cbsa_edu_sum <- chi_cbsa_edu %>%
+  rowwise(GEOID) %>%
+  mutate(PENoCollege = sum(c(LessHS1E,LessHS2E, LessHS3E, 
+                           LessHS4E, LessHS5E, LessHS6E, 
+                           LessHS7E, LessHS8E, LessHS9E, 
+                           LessHS10E, LessHS11E, LessHS12E,
+                           LessHS13E, LessHS14E, LessHS15E))/summary_est,
+         PECollege = (sum(College1E, College2E, College3E, College4E, College5E))/summary_est)
+chi_cbsa_edu_sum <- chi_cbsa_edu_sum %>% rename(EdutSum = summary_est, EduMOE = summary_moe)
+
+# Age range variables
+chi_cbsa_age <- map2_dfr(
+  my_counties$state_code, my_counties$county_code,
+  ~ get_acs(geography = "tract", state = .x, county = .y, 
+            variables = age_vars,
+            summary_var = age_pop_tot, 
+            year = 2019, 
+            output = "wide")
+  )
+
+### Unbinned age variables
+# Merging Female and Male age ranges together
+#chi_cbsa_age_sum <- chi_cbsa_age %>%
+#  rowwise(GEOID) %>%
+#  mutate(PEUnder5 = sum(c(mUnder5E, 
+#                         fUnder5E))/summary_est,
+#         PE5t9 = sum(c(m5t9E,
+#                      f5t9E))/summary_est,
+#         PE10t14 = sum(c(m10t14E,
+#                        f10t14E))/summary_est,
+#         PE15t17 = sum(c(m15t17E,
+#                        f15t17E))/summary_est,
+#         PE18t19 = sum(c(m18t19E,
+#                        f18t19E))/summary_est,
+#         PE20 = sum(c(m20E,
+#                     f20E))/summary_est,
+#         PE21 = sum(c(m21E,
+#                     f21E))/summary_est,
+#         PE22t24 = sum(c(m22t24E,
+#                        f22t24E))/summary_est,
+#         PE25t29 = sum(c(m25t29E,
+#                        f25t29E))/summary_est,
+#         PE30t34 = sum(c(m30t34E,
+#                        f30t34E))/summary_est,
+#         PE35t39 = sum(c(m35t39E,
+#                        f35t39E))/summary_est,
+#         PE40t44 = sum(c(m40t44E,
+#                        f40t44E))/summary_est,
+#         PE50t54 = sum(c(m50t54E,
+#                        f50t54E))/summary_est,
+#         PE55t59 = sum(c(m55t59E,
+#                        f55t59E))/summary_est,
+#         PE60t61 = sum(c(m60t61E,
+#                        f60t61E))/summary_est,
+#         PE62t64 = sum(c(m62t64E,
+#                        f62t64E))/summary_est,
+#         PE65t66 = sum(c(m65t66E,
+#                        f65t66E))/summary_est,
+#         PE67t69 = sum(c(m67t69E,
+#                        f67t69E))/summary_est,
+#         PE70t74 = sum(c(m70t74E,
+#                        f70t74E))/summary_est,
+#         PE75t79 = sum(c(m75t79E,
+#                        f75t79E))/summary_est,
+#         PE80t84 = sum(c(m80t84E,
+#                        f80t84E))/summary_est,
+#         PE85over = sum(c(m85overE,
+#                         f85overE))/summary_est)
+
+### Binned age variables
+chi_cbsa_age_sum <- chi_cbsa_age %>%
+  rowwise(GEOID) %>%
+  mutate(PEUnder18 = sum(c(mUnder5E,
+                           fUnder5E,
+                           m5t9E,
+                           f5t9E,
+                           m10t14E,
+                           f10t14E,
+                           m15t17E,
+                           f15t17E))/summary_est,
+         PE18t24 = sum(c(m18t19E,
+                         f18t19E,
+                         m20E,
+                         f20E,
+                         m21E,
+                         f21E,
+                         m22t24E,
+                         f22t24E))/summary_est,
+         PE25t34 = sum(c(m25t29E,
+                        f25t29E,
+                        m30t34E,
+                        f30t34E))/summary_est,
+         PE35t44 = sum(c(m35t39E,
+                          f35t39E,
+                          m40t44E,
+                          f40t44E))/summary_est,
+         PE45t54 = sum(c(m45t49E,
+                         f45t49E,
+                         m50t54E,
+                         f50t54E))/summary_est,
+         PE55t64 = sum(c(m55t59E,
+                          f55t59E,
+                          m60t61E,
+                          f60t61E,
+                          m62t64E,
+                          f62t64E))/summary_est,
+         PE65t74 = sum(c(m65t66E,
+                         f65t66E,
+                         m67t69E,
+                         f67t69E,
+                         m70t74E,
+                         f70t74E))/summary_est,
+         PE75over = sum(c(m75t79E,
+                          f75t79E,
+                          m80t84E,
+                          f80t84E,
+                          m85overE,
+                          f85overE))/summary_est)
+chi_cbsa_age_sum <- chi_cbsa_age_sum %>% rename(AgeSum = summary_est, AgeMOE = summary_moe)
+
+# Gender Variables
+chi_cbsa_gender <- map2_dfr(
+  my_counties$state_code, my_counties$county_code,
+  ~ get_acs(geography = "tract", state = .x, county = .y, 
+            variables = gender_vars,
+            summary_var = gender_tot,
+            year = 2019, 
+            output = "wide")
+  )
+
+chi_cbsa_gender_sum <- chi_cbsa_gender %>%
+  rowwise(GEOID) %>%
+  mutate(PEFemale = femaleE/summary_est,
+         PEMale = maleE/summary_est)
+chi_cbsa_gender_sum <- chi_cbsa_gender_sum %>% rename(GenderSum = summary_est, GenderMOE = summary_moe)
+
+
+
+# Merging and Cleaning Dataset
+Chi_acs2019 <- merge(chi_cbsa_race_sum, chi_cbsa_edu_sum, by="GEOID")
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_pubasst_sum, by='GEOID')
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_inc, by='GEOID')
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_age_sum, by='GEOID')
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_gender_sum, by='GEOID')
+
+
+
+# Chi_acs2019 <- Chi_acs2019 %>% select(-23,-68, -77, -82, -200) # use if age variables are unbinned
+Chi_acs2019 <- Chi_acs2019 %>% select(-23,-68, -77, -82, -185)
+Chi_acs2019 <- Chi_acs2019 %>% rename(Tract = 2)
+
+write_csv(Chi_acs2019, 'Chicago_subset_acs2019.csv')
+
+# Chi_acs2019_clean <- Chi_acs2019 %>% 
+#  select(GEOID, Tract, PEWhite, PEBlack, PENative, PEAsian, PEHIPI, PEHispanic, GiniE, MedincE, PEpubasst,
+#         PEnopubasst,PENoCollege, PECollege, PEUnder5, PE5t9, PE10t14, PE15t17, PE18t19, PE20, PE21, PE22t24, PE25t29, PE30t34, PE35t39, PE40t44, PE45t49, PE50t54, PE55t59, PE60t61, PE62t64, PE65t66, PE67t69, PE70t74, PE75t79, PE80t84, PE85over, PEFemale, PEMale) # use if age variables are unbinned
+
+Chi_acs2019_clean <- Chi_acs2019 %>% 
+  select(GEOID, Tract, PEWhite, PEBlack, PENative, PEAsian, PEHIPI, PEHispanic, GiniE, MedincE, PEpubasst,
+         PEnopubasst,PENoCollege, PECollege, PEUnder18, PE18t24, PE25t34, PE35t44, PE45t54, PE55t64, PE65t74,
+         PE75over, PEFemale, PEMale)
+
+write_csv(Chi_acs2019_clean,"Chicago_subset_acs2019_clean.csv")
+```
+
+###Building custom shapefile to accomodate all zipcodes that fall under Chicago MSA
+```{r}
+multi_state_ct_geo_list <- map2(
+  my_counties$state_code, my_counties$county_code,
+    ~ get_acs(
+        geography = "tract",
+        variables = c(pop_tot = race_summ_var),
+        state = .x,
+        county = .y,
+        year = 2019,
+        geometry = TRUE,
+        output = "wide"  # get data in wide format for easier mapping
+        )
+    )
+
+multi_state_ct_geo <- reduce(multi_state_ct_geo_list, rbind)
+
+st_write(multi_state_ct_geo, "custom_chicago_cbsa_tracts.shp", append=FALSE)
+```
+
+
+### Modifying "Building Dataset" chunk to collect zipcodes, not tracts 
+```{r}
+#Kaylah
+# acs 2019
+
+v19 <- load_variables(2019, "acs5", cache = TRUE)
+View(v19)
+
+State_lst <- c('IN', 'IL', 'WI')
+
+# Race Variables
+chi_cbsa_race <- get_acs(geography = "zcta", state = State_lst, 
+            variables = race_vars,
+            summary_var = race_summ_var,
+            year = 2019, 
+            output = "wide")
+
+chi_cbsa_race_sum <- chi_cbsa_race %>%
+  rowwise(GEOID) %>%
+  mutate(PEWhite = WhiteE/summary_est,
+         PEBlack = BlackE/summary_est,
+         PENative = NativeE/summary_est,
+         PEAsian = AsianE/summary_est,
+         PEHIPI = HIPIE/summary_est, 
+         PEHispanic = HispanicE/summary_est)
+chi_cbsa_race_sum <- chi_cbsa_race_sum %>% rename(RaceSum = summary_est, RaceMOE = summary_moe)
+
+
+# Income and Gini index Variables
+chi_cbsa_inc <- get_acs(geography = "zcta", state = State_lst,
+            variables = income_vars,
+            year = 2019, 
+            output = "wide") # Note: income variables have 17 (max) Nan values
+
+
+# Public Assitance Variables
+chi_cbsa_pubasst <- get_acs(geography = "zcta", state = State_lst, 
+            variables = pub_asst_vars,
+            summary_var = pub_asst_sum_var, 
+            year = 2019, 
+            output = "wide")
+
+chi_cbsa_pubasst_sum <- chi_cbsa_pubasst %>%
+  rowwise(GEOID) %>%
+  mutate(PEpubasst = PubasstE/summary_est,
+         PEnopubasst = NoPubasstE/summary_est)
+chi_cbsa_pubasst_sum <- chi_cbsa_pubasst_sum %>% rename(PubAsstSum = summary_est, PubAsstMOE = summary_moe)
+
+
+# Education variables
+chi_cbsa_edu <- get_acs(geography = "zcta", state = State_lst,
+            variables = edu_vars,
+            summary_var = edu_sum_var, 
+            year = 2019, 
+            output = "wide")
+
+# Only have less than HS and bachelor or higher, can add complete highschool and some college vars
+chi_cbsa_edu_sum <- chi_cbsa_edu %>%
+  rowwise(GEOID) %>%
+  mutate(PENoCollege = sum(c(LessHS1E,LessHS2E, LessHS3E, 
+                           LessHS4E, LessHS5E, LessHS6E, 
+                           LessHS7E, LessHS8E, LessHS9E, 
+                           LessHS10E, LessHS11E, LessHS12E,
+                           LessHS13E, LessHS14E, LessHS15E))/summary_est,
+         PECollege = (sum(College1E, College2E, College3E, College4E, College5E))/summary_est)
+chi_cbsa_edu_sum <- chi_cbsa_edu_sum %>% rename(EdutSum = summary_est, EduMOE = summary_moe)
+
+# Age range variables
+chi_cbsa_age <- get_acs(geography = "zcta", state = State_lst, 
+            variables = age_vars,
+            summary_var = age_pop_tot, 
+            year = 2019, 
+            output = "wide")
+
+# Merging Female and Male age ranges together and binning (see census tract for unbinned vars)
+chi_cbsa_age_sum <- chi_cbsa_age %>%
+  rowwise(GEOID) %>%
+    mutate(PEUnder18 = sum(c(mUnder5E,
+                           fUnder5E,
+                           m5t9E,
+                           f5t9E,
+                           m10t14E,
+                           f10t14E,
+                           m15t17E,
+                           f15t17E))/summary_est,
+         PE18t24 = sum(c(m18t19E,
+                         f18t19E,
+                         m20E,
+                         f20E,
+                         m21E,
+                         f21E,
+                         m22t24E,
+                         f22t24E))/summary_est,
+         PE25t34 = sum(c(m25t29E,
+                        f25t29E,
+                        m30t34E,
+                        f30t34E))/summary_est,
+         PE35t44 = sum(c(m35t39E,
+                          f35t39E,
+                          m40t44E,
+                          f40t44E))/summary_est,
+         PE45t54 = sum(c(m45t49E,
+                         f45t49E,
+                         m50t54E,
+                         f50t54E))/summary_est,
+         PE55t64 = sum(c(m55t59E,
+                          f55t59E,
+                          m60t61E,
+                          f60t61E,
+                          m62t64E,
+                          f62t64E))/summary_est,
+         PE65t74 = sum(c(m65t66E,
+                         f65t66E,
+                         m67t69E,
+                         f67t69E,
+                         m70t74E,
+                         f70t74E))/summary_est,
+         PE75over = sum(c(m75t79E,
+                          f75t79E,
+                          m80t84E,
+                          f80t84E,
+                          m85overE,
+                          f85overE))/summary_est)
+chi_cbsa_age_sum <- chi_cbsa_age_sum %>% rename(AgeSum = summary_est, AgeMOE = summary_moe)
+
+# Gender Variables
+chi_cbsa_gender <- get_acs(geography = "zcta", state = State_lst, 
+            variables = gender_vars,
+            summary_var = gender_tot,
+            year = 2019, 
+            output = "wide")
+
+chi_cbsa_gender_sum <- chi_cbsa_gender %>%
+  rowwise(GEOID) %>%
+  mutate(PEFemale = femaleE/summary_est,
+         PEMale = maleE/summary_est)
+chi_cbsa_gender_sum <- chi_cbsa_gender_sum %>% rename(GenderSum = summary_est, GenderMOE = summary_moe)
+
+
+
+# Merging and Cleaning Dataset
+Chi_acs2019 <- merge(chi_cbsa_race_sum, chi_cbsa_edu_sum, by="GEOID")
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_pubasst_sum, by='GEOID')
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_inc, by='GEOID')
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_age_sum, by='GEOID')
+Chi_acs2019 <- merge(Chi_acs2019, chi_cbsa_gender_sum, by='GEOID')
+
+
+Chi_acs2019 <- Chi_acs2019 %>% select(-23,-68, -77, -82, -185)
+Chi_acs2019 <- Chi_acs2019 %>% rename(Tract = 2)
+
+write_csv(Chi_acs2019, 'Chicago_zcta_subset_acs2019.csv')
+
+Chi_acs2019_clean <- Chi_acs2019 %>% 
+  select(GEOID, Tract, PEWhite, PEBlack, PENative, PEAsian, PEHIPI, PEHispanic, GiniE, MedincE, PEpubasst,
+         PEnopubasst,PENoCollege, PECollege, PEUnder18, PE18t24, PE25t34, PE35t44, PE45t54, PE55t64, PE65t74,
+         PE75over, PEFemale, PEMale)
+
+write_csv(Chi_acs2019_clean,"Chicago_zcta_subset_acs2019_clean.csv")
+```
+
+
