@@ -29,8 +29,20 @@ requests and the amount of time it takes to complete a request. While
 the first measure informs the demand of non-emergency services, the
 second measures reflects on the quality of responses from the city to
 its residents. We use zip codes to identify our geographical areas and
-merge in socio-demographic information from the American Community
-Survey (ACS) 2019.
+merge in sociodemographic information from the American Community Survey
+(ACS) 2019.
+
+Our project will include spatial visualizations of different 311 service
+request types, as well as other plots that will aid in illustrating the
+characteristics of a selected area. This will help to show the
+correlation between trends, for example, an influx of a graffiti
+cleaning service request and the education level of those who reside in
+that area. We plan to implement Shiny apps to show each type of 311
+request. We would also like to consider using the package `rayshader` to
+develop interactive 3-D maps to represent the frequency of service
+requests in a given area. Basic `ggplot2` visualizations will be
+developed in order to aid our 3-D interactive visualizations, such as
+density plots, line plots, or bar charts.
 
 ## [Data](proj2-rosy-eeve/Data)
 
@@ -46,48 +58,49 @@ data include request type, owner department, create date, closed date,
 and zip code. Since we are interested in the response time, we restrict
 observations to requests that have been completed. It is noted that the
 address for requests of the type “311 INFORMATION ONLY CALL” is often
-the address of the City’s 311 Center.
+the address of the City’s 311 Center. See the codebook below for all
+variables of
+interest.
 
-|Column Name             |Description                                                                                                                                                                                         |Type       |
-|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-|SR_NUMBER               |Request ID                                                                                                                                                                                          |Plain Text |
-|SR_TYPE                 |Request type                                                                                                                                                                                        |Plain Text |
-|SR_SHORT_CODE           |An internal code corresponding to the Service Request Type. This code allows for searching and filtering more easily than using the full SR_TYPE value.                                             |Plain Text |
-|OWNER_DEPARTMENT        |The department with initial responsibility for the service request.                                                                                                                                 |Plain Text |
-|STATUS                  |Status                                                                                                                                                                                              |Plain Text |
-|CREATED_DATE            |Created date                                                                                                                                                                                        |Date & Time|
-|LAST_MODIFIED_DATE      |Last modified date                                                                                                                                                                                  |Date & Time|
-|CLOSED_DATE             |Closed date                                                                                                                                                                                         |Date & Time|
-|STREET_ADDRESS          |Street address                                                                                                                                                                                      |Plain Text |
-|CITY                    |City                                                                                                                                                                                                |Plain Text |
-|STATE                   |State                                                                                                                                                                                               |Plain Text |
-|ZIP_CODE                |Zip code                                                                                                                                                                                            |Plain Text |
-|STREET_NUMBER           |Street number                                                                                                                                                                                       |Plain Text |
-|STREET_DIRECTION        |Street direction                                                                                                                                                                                    |Plain Text |
-|STREET_NAME             |Street name                                                                                                                                                                                         |Plain Text |
-|STREET_TYPE             |Street type                                                                                                                                                                                         |Plain Text |
-|DUPLICATE               |Is this request a duplicate of another request?                                                                                                                                                     |Checkbox   |
-|LEGACY_RECORD           |Did this request originate in the previous 311 system?                                                                                                                                              |Checkbox   |
-|LEGACY_SR_NUMBER        |If this request originated in the previous 311 system, the original Service Request Number.                                                                                                         |Plain Text |
-|PARENT_SR_NUMBER        |Parent Service Request of the record if applicable. If the current Service Request record has been identified as a duplicate request, the record will be created as a child of the original request.|Plain Text |
-|COMMUNITY_AREA          |Community area                                                                                                                                                                                      |Number     |
-|WARD                    |Ward                                                                                                                                                                                                |Number     |
-|ELECTRICAL_DISTRICT     |Electrical district                                                                                                                                                                                 |Plain Text |
-|ELECTRICITY_GRID        |Electrical grid                                                                                                                                                                                     |Plain Text |
-|POLICE_SECTOR           |Police sector                                                                                                                                                                                       |Plain Text |
-|POLICE_DISTRICT         |Police district                                                                                                                                                                                     |Plain Text |
-|POLICE_BEAT             |Police beat                                                                                                                                                                                         |Plain Text |
-|PRECINCT                |Precinct                                                                                                                                                                                            |Plain Text |
-|SANITATION_DIVISION_DAYS|Sanitation division days                                                                                                                                                                            |Plain Text |
-|CREATED_HOUR            |The hour of the day component of CREATED_DATE.                                                                                                                                                      |Number     |
-|CREATED_DAY_OF_WEEK     |The day of the week component of CREATED_DATE. Sunday=1                                                                                                                                             |Number     |
-|CREATED_MONTH           |The month component of CREATED_DATE                                                                                                                                                                 |Number     |
-|X_COORDINATE            |The x coordinate of the location in State Plane Illinois East NAD 1983 projection.                                                                                                                  |Number     |
-|Y_COORDINATE            |The y coordinate of the location in State Plane Illinois East NAD 1983 projection.                                                                                                                  |Number     |
-|LATITUDE                |The latitude of the location.                                                                                                                                                                       |Number     |
-|LONGITUDE               |The longitude of the location.                                                                                                                                                                      |Number     |
-|LOCATION                |The location in a format that allows for creation of maps and other geographic operations on this data portal.                                                                                      |Location   |
-
+| Column Name                | Description                                                                                                                                                                                          | Type        |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| SR\_NUMBER                 | Request ID                                                                                                                                                                                           | Plain Text  |
+| SR\_TYPE                   | Request type                                                                                                                                                                                         | Plain Text  |
+| SR\_SHORT\_CODE            | An internal code corresponding to the Service Request Type. This code allows for searching and filtering more easily than using the full SR\_TYPE value.                                             | Plain Text  |
+| OWNER\_DEPARTMENT          | The department with initial responsibility for the service request.                                                                                                                                  | Plain Text  |
+| STATUS                     | Status                                                                                                                                                                                               | Plain Text  |
+| CREATED\_DATE              | Created date                                                                                                                                                                                         | Date & Time |
+| LAST\_MODIFIED\_DATE       | Last modified date                                                                                                                                                                                   | Date & Time |
+| CLOSED\_DATE               | Closed date                                                                                                                                                                                          | Date & Time |
+| STREET\_ADDRESS            | Street address                                                                                                                                                                                       | Plain Text  |
+| CITY                       | City                                                                                                                                                                                                 | Plain Text  |
+| STATE                      | State                                                                                                                                                                                                | Plain Text  |
+| ZIP\_CODE                  | Zip code                                                                                                                                                                                             | Plain Text  |
+| STREET\_NUMBER             | Street number                                                                                                                                                                                        | Plain Text  |
+| STREET\_DIRECTION          | Street direction                                                                                                                                                                                     | Plain Text  |
+| STREET\_NAME               | Street name                                                                                                                                                                                          | Plain Text  |
+| STREET\_TYPE               | Street type                                                                                                                                                                                          | Plain Text  |
+| DUPLICATE                  | Is this request a duplicate of another request?                                                                                                                                                      | Checkbox    |
+| LEGACY\_RECORD             | Did this request originate in the previous 311 system?                                                                                                                                               | Checkbox    |
+| LEGACY\_SR\_NUMBER         | If this request originated in the previous 311 system, the original Service Request Number.                                                                                                          | Plain Text  |
+| PARENT\_SR\_NUMBER         | Parent Service Request of the record if applicable. If the current Service Request record has been identified as a duplicate request, the record will be created as a child of the original request. | Plain Text  |
+| COMMUNITY\_AREA            | Community area                                                                                                                                                                                       | Number      |
+| WARD                       | Ward                                                                                                                                                                                                 | Number      |
+| ELECTRICAL\_DISTRICT       | Electrical district                                                                                                                                                                                  | Plain Text  |
+| ELECTRICITY\_GRID          | Electrical grid                                                                                                                                                                                      | Plain Text  |
+| POLICE\_SECTOR             | Police sector                                                                                                                                                                                        | Plain Text  |
+| POLICE\_DISTRICT           | Police district                                                                                                                                                                                      | Plain Text  |
+| POLICE\_BEAT               | Police beat                                                                                                                                                                                          | Plain Text  |
+| PRECINCT                   | Precinct                                                                                                                                                                                             | Plain Text  |
+| SANITATION\_DIVISION\_DAYS | Sanitation division days                                                                                                                                                                             | Plain Text  |
+| CREATED\_HOUR              | The hour of the day component of CREATED\_DATE.                                                                                                                                                      | Number      |
+| CREATED\_DAY\_OF\_WEEK     | The day of the week component of CREATED\_DATE. Sunday=1                                                                                                                                             | Number      |
+| CREATED\_MONTH             | The month component of CREATED\_DATE                                                                                                                                                                 | Number      |
+| X\_COORDINATE              | The x coordinate of the location in State Plane Illinois East NAD 1983 projection.                                                                                                                   | Number      |
+| Y\_COORDINATE              | The y coordinate of the location in State Plane Illinois East NAD 1983 projection.                                                                                                                   | Number      |
+| LATITUDE                   | The latitude of the location.                                                                                                                                                                        | Number      |
+| LONGITUDE                  | The longitude of the location.                                                                                                                                                                       | Number      |
+| LOCATION                   | The location in a format that allows for creation of maps and other geographic operations on this data portal.                                                                                       | Location    |
 
 [Demographic
 Variables](proj2-rosy-eeve/Data/Chicago_zcta_subset_acs2019_clean.csv)
