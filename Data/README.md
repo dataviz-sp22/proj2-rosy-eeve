@@ -33,3 +33,5 @@ This Folder contains:
 
 
 - [Chicago 311 requests](https://data.cityofchicago.org/Service-Requests/311-Service-Requests/v6vf-nfxy)
+  + Downloaded from the Chicago Data Portal 
+  + [Codebook](/311 codebook.csv)
