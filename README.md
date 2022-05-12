@@ -11,7 +11,7 @@ We focus on two measures of interest regarding the 311 data: number of requests 
 
 ## [Data](proj2-rosy-eeve/Data)
 
-[Chicago 311 Service Requests](google drive link to dataset here)
+[Chicago 311 Service Requests](https://data.cityofchicago.org/Service-Requests/311-Service-Requests/v6vf-nfxy)
 
 The data on 311 Service Requests received by the City of Chicago are publicly available on the Chicago Data Portal. The dataset includes requests created after the launch of the new 311 system on 12/18/2018 and was last updated on May 11, 2022. Currently, it has 6 million rows and 37 columns, where each row is a request. Useful features from the data include request type, owner department, create date, closed date, and zip code. Since we are interested in the response time, we restrict observations to requests that have been completed. It is noted that the address for requests of the type “311 INFORMATION ONLY CALL” is often the address of the City's 311 Center. See the codebook below for all variables of interest.
 
