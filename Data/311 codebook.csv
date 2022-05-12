@@ -1,0 +1,38 @@
+Column Name,Description,Type
+SR_NUMBER,Request ID,Plain Text
+SR_TYPE,Request type,Plain Text
+SR_SHORT_CODE,An internal code corresponding to the Service Request Type. This code allows for searching and filtering more easily than using the full SR_TYPE value.,Plain Text
+OWNER_DEPARTMENT,The department with initial responsibility for the service request.,Plain Text
+STATUS,Status,Plain Text
+CREATED_DATE,Created date,Date & Time
+LAST_MODIFIED_DATE,Last modified date,Date & Time
+CLOSED_DATE,Closed date,Date & Time
+STREET_ADDRESS,Street address,Plain Text
+CITY,City,Plain Text
+STATE,State,Plain Text
+ZIP_CODE,Zip code,Plain Text
+STREET_NUMBER,Street number,Plain Text
+STREET_DIRECTION,Street direction,Plain Text
+STREET_NAME,Street name,Plain Text
+STREET_TYPE,Street type,Plain Text
+DUPLICATE,Is this request a duplicate of another request?,Checkbox
+LEGACY_RECORD,Did this request originate in the previous 311 system?,Checkbox
+LEGACY_SR_NUMBER,"If this request originated in the previous 311 system, the original Service Request Number.",Plain Text
+PARENT_SR_NUMBER,"Parent Service Request of the record if applicable. If the current Service Request record has been identified as a duplicate request, the record will be created as a child of the original request.",Plain Text
+COMMUNITY_AREA,Community area,Number
+WARD,Ward,Number
+ELECTRICAL_DISTRICT,Electrical district,Plain Text
+ELECTRICITY_GRID,Electrical grid,Plain Text
+POLICE_SECTOR,Police sector,Plain Text
+POLICE_DISTRICT,Police district,Plain Text
+POLICE_BEAT,Police beat,Plain Text
+PRECINCT,Precinct,Plain Text
+SANITATION_DIVISION_DAYS,Sanitation division days ,Plain Text
+CREATED_HOUR,The hour of the day component of CREATED_DATE.,Number
+CREATED_DAY_OF_WEEK,The day of the week component of CREATED_DATE. Sunday=1,Number
+CREATED_MONTH,The month component of CREATED_DATE,Number
+X_COORDINATE,The x coordinate of the location in State Plane Illinois East NAD 1983 projection.,Number
+Y_COORDINATE,The y coordinate of the location in State Plane Illinois East NAD 1983 projection.,Number
+LATITUDE,The latitude of the location.,Number
+LONGITUDE,The longitude of the location.,Number
+LOCATION,The location in a format that allows for creation of maps and other geographic operations on this data portal.,Location
