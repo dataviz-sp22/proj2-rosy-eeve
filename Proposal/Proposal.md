@@ -44,10 +44,10 @@ requests in a given area. Basic `ggplot2` visualizations will be
 developed in order to aid our 3-D interactive visualizations, such as
 density plots, line plots, or bar charts.
 
-## [Data](proj2-rosy-eeve/Data)
+## [Data](Data/)
 
 [Chicago 311 Service
-Requests](google%20drive%20link%20to%20dataset%20here)
+Requests](https://data.cityofchicago.org/Service-Requests/311-Service-Requests/v6vf-nfxy)
 
 The data on 311 Service Requests received by the City of Chicago are
 publicly available on the Chicago Data Portal. The dataset includes
@@ -103,7 +103,7 @@ interest.
 | LOCATION                   | The location in a format that allows for creation of maps and other geographic operations on this data portal.                                                                                       | Location    |
 
 [Demographic
-Variables](proj2-rosy-eeve/Data/Chicago_zcta_subset_acs2019_clean.csv)
+Variables](Data/Chicago_zcta_subset_acs2019_clean.csv)
 
 The American Community Survey (ACS) is a questionnaire conducted by the
 United States Census Bureau yearly to collect information about American
@@ -157,11 +157,11 @@ interest.
 
 ## Repository Organization
 
-  - [Data](proj2-rosy-eeve/Data/README.md)
+  - [Data](Data/README.md)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
-  - [Presentation](proj2-rosy-eeve/Presentation/README.md)
-  - [Proposal](proj2-rosy-eeve/Proposal/README.md)
-  - [Write-up](proj2-rosy-eeve/README.md)
+  - [Presentation](Presentation/README.md)
+  - [Proposal](Proposal/README.md)
+  - [Write-up](README.md)
 
 ## Citations
