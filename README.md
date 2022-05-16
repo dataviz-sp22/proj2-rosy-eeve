@@ -35,10 +35,10 @@ its residents. We use zip codes to identify our geographical areas and
 merge in socio-demographic information from the American Community
 Survey (ACS) 2019.
 
-## [Data](proj2-rosy-eeve/Data)
+## [Data](Data/)
 
 [Chicago 311 Service
-Requests](google%20drive%20link%20to%20dataset%20here)
+Requests](https://data.cityofchicago.org/Service-Requests/311-Service-Requests/v6vf-nfxy)
 
 The data on 311 Service Requests received by the City of Chicago are
 publicly available on the Chicago Data Portal. The dataset includes
@@ -93,7 +93,7 @@ the address of the City’s 311 Center.
 
 
 [Demographic
-Variables](proj2-rosy-eeve/Data/Chicago_zcta_subset_acs2019_clean.csv)
+Variables](Data/Chicago_zcta_subset_acs2019_clean.csv)
 
 The American Community Survey (ACS) is a questionnaire conducted by the
 United States Census Bureau yearly to collect information about American
@@ -147,12 +147,12 @@ interest.
 
 ## Repository Organization
 
-  - [Data](proj2-rosy-eeve/Data/README.md)
+  - [Data](Data/README.md)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
-  - [Presentation](proj2-rosy-eeve/Presentation/README.md)
-  - [Proposal](proj2-rosy-eeve/Proposal/README.md)
-  - [Write-up](proj2-rosy-eeve/README.md)
+  - [Presentation](Presentation/README.md)
+  - [Proposal](Proposal/README.md)
+  - [Write-up](README.md)
 
 ## Citations
 
