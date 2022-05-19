@@ -44,10 +44,16 @@ requests in a given area. Basic `ggplot2` visualizations will be
 developed in order to aid our 3-D interactive visualizations, such as
 density plots, line plots, or bar charts.
 
-## [Data](Data/)
+We intend to add an element of interactivity to this analysis using
+Shiny app. The app will include the ability to toogle certain categories
+of service requests, as well as select a community area in order to see
+the distribution of service requests and the demographic patterns
+associated with the frequency of requests in the area.
+
+## [Data](proj2-rosy-eeve/Data)
 
 [Chicago 311 Service
-Requests](https://data.cityofchicago.org/Service-Requests/311-Service-Requests/v6vf-nfxy)
+Requests](google%20drive%20link%20to%20dataset%20here)
 
 The data on 311 Service Requests received by the City of Chicago are
 publicly available on the Chicago Data Portal. The dataset includes
@@ -103,7 +109,7 @@ interest.
 | LOCATION                   | The location in a format that allows for creation of maps and other geographic operations on this data portal.                                                                                       | Location    |
 
 [Demographic
-Variables](Data/Chicago_zcta_subset_acs2019_clean.csv)
+Variables](proj2-rosy-eeve/Data/Chicago_zcta_subset_acs2019_clean.csv)
 
 The American Community Survey (ACS) is a questionnaire conducted by the
 United States Census Bureau yearly to collect information about American
@@ -112,8 +118,12 @@ survey in the year 2019, and converted into a workable dataset using
 `tidyCensus`. Our subset of data includes 24 columns and 296 rows
 correlating to Chicago and other outlying areas included in the Chicago
 Metropolitan Statistical Area (MSA). Only zip codes included in the
-Chicago 311 dataset will be selected from this dataset. See the codebook
-below for all variables of
+Chicago 311 dataset will be selected from this dataset. Among the
+selected variables include factors relevant to race, education, age,
+gender, and socioeconomic status. While the already selected variables
+are robust, the many questions included in the original survey allow for
+us to add or reduce the number of variables included as necessary. See
+the codebook below for all variables of
 interest.
 
 | variable\_id | label                                                       | class     |
@@ -157,11 +167,11 @@ interest.
 
 ## Repository Organization
 
-  - [Data](Data/README.md)
+  - [Data](proj2-rosy-eeve/Data/README.md)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
-  - [Presentation](Presentation/README.md)
-  - [Proposal](Proposal/README.md)
-  - [Write-up](README.md)
+  - [Presentation](proj2-rosy-eeve/Presentation/README.md)
+  - [Proposal](proj2-rosy-eeve/Proposal/README.md)
+  - [Write-up](proj2-rosy-eeve/README.md)
 
 ## Citations
