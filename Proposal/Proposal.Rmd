@@ -19,6 +19,8 @@ We focus on two measures of interest regarding the 311 data: number of requests 
 
 Our project will include spatial visualizations of different 311 service request types, as well as other plots that will aid in illustrating the characteristics of a selected area. This will help to show the correlation between trends, for example, an influx of a graffiti cleaning service request and the education level of those who reside in that area. We plan to implement Shiny apps to show each type of 311 request. We would also like to consider using the package `rayshader` to develop interactive 3-D maps to represent the frequency of service requests in a given area. Basic `ggplot2` visualizations will be developed in order to aid our 3-D interactive visualizations, such as density plots, line plots, or bar charts. 
 
+We intend to add an element of interactivity to this analysis using Shiny app. The app will include the ability to toogle certain categories of service requests, as well as select a community area in order to see the distribution of service requests and the demographic patterns associated with the frequency of requests in the area.
+
 ## [Data](proj2-rosy-eeve/Data)
 
 [Chicago 311 Service Requests](google drive link to dataset here)
@@ -68,7 +70,7 @@ The data on 311 Service Requests received by the City of Chicago are publicly av
 
 [Demographic Variables](proj2-rosy-eeve/Data/Chicago_zcta_subset_acs2019_clean.csv)
 
-The American Community Survey (ACS) is a questionnaire conducted by the United States Census Bureau yearly to collect information about American citizens. Relevant sociodemographic elements were selected from this survey in the year 2019, and converted into a workable dataset using `tidyCensus`. Our subset of data includes 24 columns and 296 rows correlating to Chicago and other outlying areas included in the Chicago Metropolitan Statistical Area (MSA). Only zip codes included in the Chicago 311 dataset will be selected from this dataset. See the codebook below for all variables of interest. 
+The American Community Survey (ACS) is a questionnaire conducted by the United States Census Bureau yearly to collect information about American citizens. Relevant sociodemographic elements were selected from this survey in the year 2019, and converted into a workable dataset using `tidyCensus`. Our subset of data includes 24 columns and 296 rows correlating to Chicago and other outlying areas included in the Chicago Metropolitan Statistical Area (MSA). Only zip codes included in the Chicago 311 dataset will be selected from this dataset. Among the selected variables include factors relevant to race, education, age, gender, and socioeconomic status. While the already selected variables are robust, the many questions included in the original survey allow for us to add or reduce the number of variables included as necessary. See the codebook below for all variables of interest. 
 
 | variable_id | label                                                       | class     |
 |-------------|-------------------------------------------------------------|-----------|
