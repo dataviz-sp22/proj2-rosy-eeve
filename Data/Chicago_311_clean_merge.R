@@ -20,7 +20,7 @@ df = df %>%
            !is.na(ZIP) &
            !is.na(LATITUDE) &
            !is.na(LONGITUDE) &
-           YEAR %in% 2019
+           YEAR %in% 2019 
   ) %>% select(
     SR_NUMBER,SR_TYPE, OWNER_DEPARTMENT,CREATED_DATE,CLOSED_DATE,ZIP,YEAR,
     CREATED_HOUR,CREATED_DAY_OF_WEEK,CREATED_MONTH
@@ -31,5 +31,5 @@ df = df %>%
 dfacs = df %>% left_join(acs,by=c("ZIP"="GEOID")) %>% na.omit()
  
 #write save data 
+save(df,   file = "data/Chicago_311_clean.Rdata")
 save(dfacs,file = "data/Chicago_311_clean_merge.Rdata")
-
