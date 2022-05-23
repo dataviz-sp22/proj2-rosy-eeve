@@ -32,6 +32,9 @@ save(df,   file = "data/Chicago_311_clean.Rdata")
 ####################################
 #Merge 311 data with ACS data
 ####################################
+#load 311 data 
+load("data/Chicago_311_clean.Rdata")
+
 #acs data 
 acs = read.csv("data/Chicago_zcta_subset_acs2019_clean.csv")
 
