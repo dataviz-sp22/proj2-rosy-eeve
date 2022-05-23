@@ -2,13 +2,12 @@
 library(tidyverse)
 library(reshape2)
 
-#load data
+####################################
 #311 data
+####################################
+#load data
 #https://data.cityofchicago.org/Service-Requests/311-Service-Requests/v6vf-nfxy
 df <- read.csv("C:/Users/bebut/Downloads/311_Service_Requests.csv")
-
-#acs data 
-acs = read.csv("data/Chicago_zcta_subset_acs2019_clean.csv")
 
 #311 data cleaning
 df = df %>%
@@ -27,9 +26,17 @@ df = df %>%
     #X_COORDINATE,Y_COORDINATE,LATITUDE,LONGITUDE
   )
 
+#write save data 
+save(df,   file = "data/Chicago_311_clean.Rdata")
+
+####################################
+#Merge 311 data with ACS data
+####################################
+#acs data 
+acs = read.csv("data/Chicago_zcta_subset_acs2019_clean.csv")
+
 #merge 311 data and acs data 
 dfacs = df %>% left_join(acs,by=c("ZIP"="GEOID")) %>% na.omit()
  
 #write save data 
-save(df,   file = "data/Chicago_311_clean.Rdata")
-save(dfacs,file = "data/Chicago_311_clean_merge.Rdata")
+#save(dfacs,file = "data/Chicago_311_clean_merge.Rdata")
