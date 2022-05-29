@@ -5,9 +5,9 @@ account: thaophuongtran
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6368875
-bundleId: 5942015
+bundleId: 5956307
 url: https://thaophuongtran.shinyapps.io/dataviz_project2_temp/
-when: 1653456991.60584
-lastSyncTime: 1653456991.60584
+when: 1653805331.32983
+lastSyncTime: 1653805331.32983
 asMultiple: FALSE
 asStatic: FALSE
