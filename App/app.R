@@ -28,23 +28,23 @@ library(colorspace)
 load("Chicago_311_clean_sample1K.Rdata")
 
 #create response time
-df$daystoclose = as.numeric(as.Date(df$CLOSED_DATE,"%m/%d/%Y")-as.Date(df$CREATED_DATE,"%m/%d/%Y"))
+df$daystoclose <- as.numeric(as.Date(df$CLOSED_DATE,"%m/%d/%Y")-as.Date(df$CREATED_DATE,"%m/%d/%Y"))
 
 #acs data 
 #acs = read.csv("App/Chicago_zcta_subset_acs2019_clean.csv")
-acs = read.csv("Chicago_zcta_subset_acs2019_clean.csv")
+acs <- read.csv("Data/Chicago_zcta_subset_acs2019_clean.csv")
 
 #rename acs variables
-names(acs) = gsub("PE","",names(acs),fixed=TRUE)
+names(acs) <- gsub("PE","",names(acs),fixed=TRUE)
 
 #reshape data from wide to long
-acsmelt = acs %>% select(-Tract) %>% melt(id.vars = "GEOID")
+acsmelt <- acs %>% select(-Tract) %>% melt(id.vars = "GEOID")
 
 #read shp file
 #zipcode <- st_read("App/ma_zip_shapefile/acs2020_5yr_B01003_86000US60140.shp")
 zipcode <- st_read("ma_zip_shapefile/acs2020_5yr_B01003_86000US60140.shp")
 
-
+name_lst <- names()
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -77,7 +77,7 @@ ui <- fluidPage(
             br(),
             
             # Input: Choose demo variable
-            radioButtons("demo", "Socio-Demographic characteristics - Select a variable:",
+            selectInput("demo", "Socio-Demographic characteristics - Select a variable:",
                          choiceValues = names(acs[,-c(1:2)]),
                          selected = names(acs[,3]),
                          choiceNames = c("Race & Ethinicity: White","Race & Ethinicity: Black","Race & Ethinicity: Native","Race & Ethinicity: Asian", "Race & Ethinicity: HIPI",  "Race & Ethinicity: Hispanic",  
@@ -95,7 +95,7 @@ ui <- fluidPage(
             # Output: Tabset w/ plot, summary, and table ----
             tabsetPanel(type = "tabs",
                         #tabPanel("Plot", plotOutput("plot"), plotOutput("plot2"), plotOutput("plot3")),
-                        tabPanel("Request Volume",fluidRow(splitLayout(cellWidths = c("50%", "50%"), plotOutput("plot"), plotOutput("plot2"))),
+                        tabPanel("Request Volume",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plot"), plotOutput("plot2"))),
                                  plotOutput("plot4")),
                         tabPanel("Response Time",fluidRow(splitLayout(cellWidths = c("50%", "50%"), plotOutput("plotb"), plotOutput("plot2b"))),
                                  plotOutput("plot4b")),
@@ -132,12 +132,17 @@ server <- function(input, output) {
                        by=c("name"="ZIP")) %>%
             ggplot(aes(fill = n))+
             labs(
-                title = paste("Choropleths of 311 Requests Volume:",input$dep),
-                fill = "Request Volume"
+                title = paste("311 Request Volume per Zip Code:\n",input$dep),
+                fill = "Request\nVolume"
                 )+
             geom_sf()+
             scale_fill_continuous_sequential("SunsetDark")+
-            theme_bw()
+            theme_bw() +
+            theme(legend.position = c(0.2, 0.2),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  axis.line = element_line(),
+                  axis.ticks = element_line())
     })
     
     # Generate a plot of the data ----
@@ -151,11 +156,17 @@ server <- function(input, output) {
             ggplot(aes(fill = value))+
             geom_sf()+
             labs(
-                title = paste("Choropleths of Population Share for",input$demo),
+                title = paste("Population Share of \nSociodemographic variable:",input$demo),
+                subtitle = "in Chicago",
                 fill = input$demo, 
             )+
             scale_fill_continuous_sequential("Mako")+
-            theme_bw()
+            theme_bw() +
+            theme(legend.position = c(0.2, 0.2),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  axis.line = element_line(),
+                  axis.ticks = element_line())
     })
     
     
