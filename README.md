@@ -49,7 +49,7 @@ The visuals show that the volume and response time for various requests type gen
 
 ## Repository Organization
 
-  - [Data](proj2-rosy-eeve/Data)
+  - [Data](Data)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
   - [Presentation](proj2-rosy-eeve/Presentation/README.md)
