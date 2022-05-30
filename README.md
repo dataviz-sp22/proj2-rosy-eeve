@@ -52,8 +52,8 @@ The visuals show that the volume and response time for various requests type gen
   - [Data](Data)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
-  - [Presentation](proj2-rosy-eeve/Presentation/README.md)
-  - [Proposal](proj2-rosy-eeve/Proposal/README.md)
-  - [Write-up](proj2-rosy-eeve/README.md)
+  - [Presentation](Presentation/README.md)
+  - [Proposal](Proposal/README.md)
+  - [Write-up](README.md)
 
 ## Citations
