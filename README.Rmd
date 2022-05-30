@@ -1,9 +1,16 @@
-Project 2 Write-Up
-================
+---
+title: "Project 2 Write-Up"
+output: github_document
+---
 
-\#Project 2 Write-up
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-\#\#Kamran Ahmed, Kaylah Thomas, Thao Tran (Rosy Eeve) \#\#5/11/2022
+#Project 2 Write-up
+
+##Kamran Ahmed, Kaylah Thomas, Thao Tran (Rosy Eeve)
+##5/11/2022
 
 ## Introduction
 
@@ -21,22 +28,15 @@ e-government movement in which technological innovations are deployed to
 help local governments deliver more efficient and effective services to
 residents. Thus, we employ the 311 data in Chicago to provide insights
 on the variation of communities’ needs and assist the city to better
-allocate resources accordingly. We are also interested in incorporating
-demographic measures into this analysis. Examining the distribution of
-requests for areas with varying sociodemographic characteristics can
-possibly help to show where more resources should be allocated, or other
-trends in requests.
+allocate resources accordingly. We are also interested in incorporating demographic measures into this analysis. Examining the distribution of requests for areas with varying sociodemographic characteristics can possibly help to show where more resources should be allocated, or other trends in requests. 
 
 We focus on two measures of interest regarding the 311 data: number of
 requests and the amount of time it takes to complete a request. While
 the first measure informs the demand of non-emergency services, the
-second measure reflects the quality of responses from the city to its
-residents, where longer requests may be lower quality since there is a
-delay in serving the community. We use zip codes to identify our
-geographical areas and merge in sociodemographic information from the
-American Community Survey (ACS) 2019. (see the [data]() folder of this
-repository for information about the variables of interest used in this
-analysis.
+second measure reflects the quality of responses from the city to
+its residents, where longer requests may be lower quality since there is a delay in serving the community. We use zip codes to identify our geographical areas and
+merge in sociodemographic information from the American Community Survey
+(ACS) 2019. (see the [data]() folder of this repository for information about the variables of interest used in this analysis. 
 
 Our project will include spatial visualizations of varying 311 service
 request types, as well as other plots that will aid in illustrating the
@@ -71,7 +71,8 @@ and zip code. Since we are interested in the response time, we restrict
 observations to requests that have been completed. It is noted that the
 address for requests of the type “311 INFORMATION ONLY CALL” is often
 the address of the City’s 311 Center. See the codebook below for all
-variables of interest.
+variables of
+interest.
 
 [Demographic
 Variables](proj2-rosy-eeve/Data/Chicago_zcta_subset_acs2019_clean.csv)
@@ -90,6 +91,7 @@ are robust, the many questions included in the original survey allow for
 us to add or reduce the number of variables included as necessary. See
 the codebook below for all variables of interest.
 
+
 ## Repository Organization
 
   - [Data](proj2-rosy-eeve/Data/README.md)
@@ -100,3 +102,4 @@ the codebook below for all variables of interest.
   - [Write-up](proj2-rosy-eeve/README.md)
 
 ## Citations
+
