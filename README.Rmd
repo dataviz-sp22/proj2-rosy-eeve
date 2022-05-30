@@ -21,8 +21,7 @@ In this project, we utilize interactive and animated spatio-temporal visualizati
 The 311 system is a non-emergency response system where people can make a request to find information about services, make complaints, or report non-emergency problems, such as potholes and trash collection. While the system was initially designed to reduce call volume on the overloaded 911 system, 311 request systems have become an integral part of the e-government movement in which technological innovations are deployed to help local governments deliver more efficient and effective services to residents. Thus, we employ the 311 data in Chicago to provide insights on the variation of communities’ needs and assist the city to better allocate resources accordingly. We incorporate the demographic distribution or socioeconomic measures in order to determine if areas with unusually high or low requests for different services may correlate to a certain distribution of the area.
 
 
-We focus on two measures of interest regarding the 311 data: number of requests and the amount of time it takes to complete a request. While the first measure informs the demand of non-emergency services, the second measures reflect on the quality of responses from the city to its residents. We use zip codes to identify our geographical areas and merge in socio-demographic information from the American Community Survey (ACS) 2019. (see the [data](Data/README.md) folder of this repository for information about the variables of interest used in this
-analysis.
+We focus on two measures of interest regarding the 311 data: number of requests and the amount of time it takes to complete a request. While the first measure informs the demand of non-emergency services, the second measures reflect on the quality of responses from the city to its residents. We use zip codes to identify our geographical areas and merge in socio-demographic information from the American Community Survey (ACS) 2019. (see the [data](Data/README.md) folder of this repository for information about the variables of interest used in this analysis.
 
 For our analysis, we use the data on 311 Service Requests received by the City of Chicago that are publicly available on the Chicago Data Portal. The dataset includes requests created after the launch of the new 311 system on 12/18/2018 and was last updated on May 11, 2022. Currently, it has 6 million rows and 37 columns, where each row is a request. Useful features from the data include request type, owner department, create date, closed date, and zip code. Since we are interested in the response time, we restrict observations to requests that have been completed. It is noted that the address for requests of the type “311 INFORMATION ONLY CALL” is often the address of the City’s 311 Center. We have created a subset the data, limiting it to a sample of 1000 observations for the sake of faster loading for our demo purposes. See the codebook in data folder for all variables of interest.
 
@@ -55,7 +54,7 @@ The visuals show that the volume and response time for various requests type gen
 
 ## Repository Organization
 
-  - [Data](Data/README.md)
+  - [Data](proj2-rosy-eeve/Data/README.md)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
   - [Presentation](Presentation/README.md)
