@@ -50,6 +50,7 @@ Response time for Restaurant complaints is much longer for communities with lowe
 Response time for Tree removal requests is double (over 150 days) for communities with higher white population share as compared to those with lower white population shares (75 days).
 The response time for requests related to Streets and sanitation is generally higher for communities with lower median income compared to those with higher income.
 The visuals show that the volume and response time for various requests type generally differ across different socio-demographic groups and no general inference can be drawn for all requests all together. However, for each specific type of request, some interesting patterns can be seen as the volume and response time for a particular request is significantly different across different groups.
+Since we have limited our data to only 1000 observations it is quite hard to generate meaningful insights based on the limited data.
 
 
 ## Repository Organization

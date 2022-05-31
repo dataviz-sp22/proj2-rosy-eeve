@@ -383,7 +383,8 @@ server <- function(input, output) {
                    p("The response time for requests related to Streets and sanitation is generally higher for communities with lower median income compared to those with higher income."),
                    br(),
                    p("The visuals show that the volume and response time for various requests type generally differ across different socio-demographic groups and no general inference can be drawn for all requests all together. However, for each specific type of request, some interesting patterns can be seen as the volume and response time for a particular request is significantly different across different groups."),
-                   
+                   br(),
+                   p("Since we have limited our data to only 1000 observations it is quite hard to generate meaningful insights based on the limited data."),
                    
         ))
     })
