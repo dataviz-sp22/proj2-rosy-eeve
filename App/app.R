@@ -179,13 +179,13 @@ server <- function(input, output) {
             filter(GEOID %in% unique(df$ZIP)) %>%
             group_by(variable) %>% 
             mutate(cut  = cut(value,4,labels= FALSE))
-        df <- df %>% 
+        df2 <- df %>% 
             left_join(acsbreaks %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
             filter(OWNER_DEPARTMENT == input$dep)
         
-        if ((1 %in% unique(df$cut)) | (4 %in% unique(df$cut))) {
+        if ((1 %in% unique(df2$cut)) | (4 %in% unique(df2$cut))) {
             
-            cond_plot <- df %>% 
+            cond_plot <- df2 %>% 
             filter(cut %in% c(1,4)) %>% 
             group_by(SR_TYPE,cut) %>%
             count() %>% 
@@ -207,9 +207,9 @@ server <- function(input, output) {
             )+scale_fill_manual(values = c("red4","dodgerblue4"))
         }
         
-        if (!(1 %in% unique(df$cut)) | !(4 %in% unique(df$cut))) {
+        if (!(1 %in% unique(df2$cut)) | !(4 %in% unique(df2$cut))) {
             
-            cond_plot <- df %>% 
+            cond_plot <- df2 %>% 
                 mutate(PEdist = ifelse(value >= 0.5, 1, 0)) %>%
                 group_by(SR_TYPE,PEdist) %>%
                 count() %>% 
@@ -292,17 +292,17 @@ server <- function(input, output) {
             filter(GEOID %in% unique(df$ZIP)) %>%
             group_by(variable) %>% 
             mutate(cut  = cut(value,4,labels= FALSE))
-        df <- df %>% 
+        df2 <- df %>% 
             left_join(acsbreaks %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
             filter(OWNER_DEPARTMENT == input$dep)
         
-        if ((1 %in% unique(df$cut)) | (4 %in% unique(df$cut))) {
+        if ((1 %in% unique(df2$cut)) | (4 %in% unique(df2$cut))) {
             
-            cond_plot <- df %>%  
+            cond_plot <- df2 %>%  
             filter(cut %in% c(1,4)) %>% 
             group_by(SR_TYPE,cut) %>%
             summarize(n = mean(daystoclose[OWNER_DEPARTMENT == input$dep])) %>%
-            mutate(cut = ifelse(cut == 1,"Bottom 25 percent","Top 25 percent")) %>%
+            mutate(cut = ifelse(cut == 1,"Bottom 25%","Top 25%")) %>%
             ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = cut))+
             geom_col()+
             facet_wrap(~cut, labeller = labeller(cut = c("Bottom 25%" = "Number of Requests for Zip Codes\n below the 25th Percentile", 
@@ -320,9 +320,9 @@ server <- function(input, output) {
             )+scale_fill_manual(values = c("red4","dodgerblue4"))
             }
         
-        if (!(1 %in% unique(df$cut)) & !(4 %in% unique(df$cut))) {
+        if (!(1 %in% unique(df2$cut)) & !(4 %in% unique(df2$cut))) {
             
-            cond_plot <- df %>% 
+            cond_plot <- df2 %>% 
                 mutate(PEdist = ifelse(value >= 0.5, 1, 0)) %>%
                 group_by(SR_TYPE,PEdist) %>%
                 summarize(n = mean(daystoclose[OWNER_DEPARTMENT == input$dep])) %>%
