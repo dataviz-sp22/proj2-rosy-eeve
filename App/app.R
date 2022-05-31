@@ -37,6 +37,8 @@ names(acs) <- gsub("PE","",names(acs),fixed=TRUE)
 #reshape data from wide to long
 acsmelt <- acs %>% select(-Tract) %>% melt(id.vars = "GEOID")
 
+# load zip code 
+zipcode = st_read("ma_zip_shapefile/acs2020_5yr_B01003_86000US60140.shp")
 
 
 # Define UI for application that draws a histogram
