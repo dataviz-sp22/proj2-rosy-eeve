@@ -351,7 +351,7 @@ server <- function(input, output) {
     
     # Generate a summary content ----
     output$about <- renderPrint({
-        HTML(paste(h1("Introduction"),
+        HTML(paste(h1("Introduction:"),
                    br(),
                    p("In this project, we utilize interactive and animated spatio-temporal visualization to illustrate how the composition of non-emergency requests differ across communities with varying sociodemographic characteristics in the Chicago 311 Service Requests data."),
                    br(),
@@ -402,8 +402,7 @@ server <- function(input, output) {
                    br(),
                    p("The visuals show that the volume and response time for various requests type generally differ across different socio-demographic groups and no general inference can be drawn for all requests all together. However, for each specific type of request, some interesting patterns can be seen as the volume and response time for a particular request is significantly different across different groups."),
                    br(),
-                   p("Since we have limited our data to only 1000 observations it is quite hard to generate meaningful insights based on the limited data."),
-                   
+                   p("Since we have limited our data to only 1000 observations it is quite hard to generate meaningful insights based on the limited data.")
         ))
     })
     
