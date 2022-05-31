@@ -18,31 +18,24 @@ library(patchwork)
 library(colorspace)
 
 #load 311 data 
-#load("App/Chicago_311_clean.Rdata")
-#create test data
-#set.seed(0)
-#df = sample_n(df,1000)
-#save(df,file = "Chicago_311_clean_sample1K.Rdata")
-#load test data
-#load("App/Chicago_311_clean_sample1K.Rdata")
+
 load("Chicago_311_clean_sample1K.Rdata")
 
 #create response time
 df$daystoclose <- as.numeric(as.Date(df$CLOSED_DATE,"%m/%d/%Y")-as.Date(df$CREATED_DATE,"%m/%d/%Y"))
 
 #acs data 
-#acs = read.csv("App/Chicago_zcta_subset_acs2019_clean.csv")
 acs <- read.csv("Chicago_zcta_subset_acs2019_clean.csv")
 
 #rename acs variables
+acs <- acs %>%
+    select(-MedincE) %>%
+    rename(PE35t44 = PE35t34)
+
 names(acs) <- gsub("PE","",names(acs),fixed=TRUE)
 
 #reshape data from wide to long
 acsmelt <- acs %>% select(-Tract) %>% melt(id.vars = "GEOID")
-
-#read shp file
-#zipcode <- st_read("App/ma_zip_shapefile/acs2020_5yr_B01003_86000US60140.shp")
-zipcode <- st_read("ma_zip_shapefile/acs2020_5yr_B01003_86000US60140.shp")
 
 
 
@@ -57,15 +50,6 @@ ui <- fluidPage(
         
         # Sidebar panel for inputs ----
         sidebarPanel(
-            
-            # # Input: Select the demographics variable ----
-            # selectInput("demo", "Socio-Demographic characteristics - Select a variable:",
-            #             names(acs[,-c(1:2)]),"Female"
-            #             #list(`Sex` = list("Female", "Male"),
-            #             #     `Education` = list("College", "No College")
-            #             #     )
-            # ),
-            
             
             # Input: Choose a department type
             radioButtons("dep", "311 Characteristics - Select a department:",
@@ -87,7 +71,6 @@ ui <- fluidPage(
                                          "Race & Ethinicity: HIPI"="HIPI",  
                                          "Race & Ethinicity: Hispanic"="Hispanic",  
                                          "Income: Gini Index"="GiniE", 
-                                         "Income: Median Income"="MedincE",  
                                          "Income: Public Assistance"="pubasst",  
                                          "Income: No Public Assistance"="nopubasst", 
                                          "Education: No College"="NoCollege",
@@ -95,7 +78,7 @@ ui <- fluidPage(
                                          "Age: Under 18"="Under18", 
                                          "Age: 18 to 24"="18t24", 
                                          "Age: 25 to 34"="25t34", 
-                                         "Age: 35 to 44"="35t34", 
+                                         "Age: 35 to 44"="35t44", 
                                          "Age: 45 to 54"="45t54", 
                                          "Age: 55 to 64"="55t64", 
                                          "Age: 65 to 74"="65t74", 
@@ -111,7 +94,6 @@ ui <- fluidPage(
             
             # Output: Tabset w/ plot, summary, and table ----
             tabsetPanel(type = "tabs",
-                        #tabPanel("Plot", plotOutput("plot"), plotOutput("plot2"), plotOutput("plot3")),
                         tabPanel("Request Volume",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plot"), plotOutput("plot2"))),
                                  plotOutput("plot4")),
                         tabPanel("Response Time",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plotb"), plotOutput("plot2b"))),
@@ -149,7 +131,8 @@ server <- function(input, output) {
                        by=c("name"="ZIP")) %>%
             ggplot(aes(fill = n))+
             labs(
-                title = paste(input$dep, "Request Volume\n by Chicago Zip Code"),
+                title = paste(input$dep, "Request Volume"),
+                subtitle = "by Chicago Zip Code",
                 fill = "Request\nVolume"
                 )+
             geom_sf()+
@@ -175,7 +158,7 @@ server <- function(input, output) {
             labs(
                 title = paste("Population Share of \nSociodemographic variable:",input$demo),
                 subtitle = "by Chicago Zip Code",
-                fill = input$demo, 
+                fill = paste('%', input$demo) 
             )+
             scale_fill_continuous_sequential("Mako")+
             theme_bw() +
@@ -185,28 +168,7 @@ server <- function(input, output) {
                   axis.line = element_line(),
                   axis.ticks = element_line())
     })
-    
-    
-    # Generate a plot of the data ----
-    output$plot3 <- renderPlot({
-        
-        #example of scatter plot highlight a zipcode 
-        df %>% group_by(ZIP) %>%
-            mutate(total_requests = n()) %>%
-            group_by(ZIP,total_requests) %>% 
-            summarize(n = sum(OWNER_DEPARTMENT == input$dep)) %>%
-            left_join(acsmelt %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
-            ggplot(aes(y = n, x = value,size = total_requests))+
-            geom_point()+
-            geom_smooth(method=lm)+
-            labs(
-                title = paste("Scatterplot between 311 Requests from",input$dep,"and Population Share of",input$demo),
-                y = paste("Request Volume in", input$dep),
-                x=input$demo,
-                size = "Volume of All Requests"
-            )+
-            theme_bw()
-    })
+
     
     # Generate a plot of the data ----
     output$plot4 <- renderPlot({
@@ -219,7 +181,7 @@ server <- function(input, output) {
             left_join(acsbreaks %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
             filter(OWNER_DEPARTMENT == input$dep)
         
-        if ((1 %in% unique(df$cut)) & (4 %in% unique(df$cut))) {
+        if ((1 %in% unique(df$cut)) | (4 %in% unique(df$cut))) {
             
             cond_plot <- df %>% 
             filter(cut %in% c(1,4)) %>% 
@@ -228,35 +190,39 @@ server <- function(input, output) {
             mutate(cut = ifelse(cut == 1,"Bottom 25%","Top 25%")) %>%
             ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = cut))+
             geom_col()+
-            facet_wrap(~cut, labeller = labeller(cut = c("Bottom 25%" = "Requests for Zip Codes below the 25th Percentile", 
-                                                         "Top 25%" = "Requests for Zip Codes above the 75th Percentile")))+
+            facet_wrap(~cut, labeller = labeller(cut = c("Bottom 25%" = "Number of Requests for Zip Codes\n below the 25th Percentile", 
+                                                         "Top 25%" = "Number of Requests for Zip Codes\n above the 75th Percentile")))+
             theme_bw()+
             theme(legend.position = "none", strip.background = element_blank())+
             labs(
-                title=paste("311 Request Volume by Chicago Zip Code for variable:\n",input$dep),
-                subtitle = paste("By the top and bottom quartile of",input$demo,"population share"),
+                title=paste(input$dep, 
+                            "Request Volume for Zip Codes in\n Top and Bottom Quartiles of",
+                            input$demo, 
+                            "Population Percentage"),
                 y="",
-                x="Request Volume",
+                x="Number of Requests",
                 
             )+scale_fill_manual(values = c("red4","dodgerblue4"))
         }
         
-        if (!(1 %in% unique(df$cut)) & !(4 %in% unique(df$cut))) {
+        if (!(1 %in% unique(df$cut)) | !(4 %in% unique(df$cut))) {
             
             cond_plot <- df %>% 
                 mutate(PEdist = ifelse(value >= 0.5, 1, 0)) %>%
                 group_by(SR_TYPE,PEdist) %>%
                 count() %>% 
-                mutate(cut = ifelse(PEdist == 0,"Bottom 50%","Top 50%")) %>%
-                ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = factor(PEdist)))+
+                mutate(Half = ifelse(PEdist == 0,"Bottom 50%","Top 50%")) %>%
+                ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = factor(Half)))+
                 geom_col()+
-                facet_wrap(~cut, labeller = labeller(cut = c("Bottom 50%" = "Sociodemographic distribution below 50%", 
+                facet_wrap(~Half, labeller = labeller(Half = c("Bottom 50%" = "Sociodemographic distribution below 50%", 
                                                              "Top 50%" = "Sociodemographic distribution above 50%")))+
                 theme_bw()+
                 theme(legend.position = "none", strip.background = element_blank())+
                 labs(
-                    title=paste("311 Request Volume by Chicago Zip Code for variable:\n",input$dep),
-                    subtitle = paste("By the top and bottom quartile of",input$demo,"population share"),
+                    title=paste(input$dep, 
+                                "Request Volume for Zip Codes\n Above or Below 50% of",
+                                input$demo, 
+                                "Population Percentage"),
                     y="",
                     x="Request Volume",
                     
@@ -279,7 +245,8 @@ server <- function(input, output) {
                        by=c("name"="ZIP")) %>%
             ggplot(aes(fill = n))+
             labs(
-                title = paste(input$dep, "Request Response\n Time by Chicago Zip Code"),
+                title = paste(input$dep, "Request\n Response Time"),
+                subtitle = "by Chicago Zip Code",
                 fill = "Days until\n Response"
             )+
             geom_sf()+
@@ -304,7 +271,8 @@ server <- function(input, output) {
             geom_sf()+
             labs(
                 title = paste("Population Share of \nSociodemographic variable:",input$demo),
-                fill = input$demo, 
+                subtitle = "by Chicago Zip Code",
+                fill = paste('%', input$demo) 
             )+
             scale_fill_continuous_sequential("Mako")+
             theme_bw()+
@@ -315,55 +283,66 @@ server <- function(input, output) {
                   axis.ticks = element_line())
     })
     
-    
-    # Generate a plot of the data ----
-    output$plot3b <- renderPlot({
-        
-        #example of scatter plot highlight a zipcode 
-        df %>% group_by(ZIP) %>%
-            mutate(total_requests = n()) %>%
-            group_by(ZIP,total_requests) %>% 
-            summarize(n = mean(daystoclose[OWNER_DEPARTMENT == input$dep])) %>%
-            left_join(acsmelt %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
-            ggplot(aes(y = n, x = value,size = total_requests))+
-            geom_point()+
-            geom_smooth(method=lm)+
-            labs(
-                title = paste("Scatterplot between 311 Requests from",input$dep,"and Population Share of",input$demo),
-                y = paste("Response Time in", input$dep),
-                x=input$demo,
-                size = "Response Time in Days"
-            )+
-            theme_bw()
-    })
-    
     # Generate a plot of the data ----
     output$plot4b <- renderPlot({
         
-        acsbreaks = acsmelt %>% 
+        acsbreaks <- acsmelt %>% 
             filter(GEOID %in% unique(df$ZIP)) %>%
             group_by(variable) %>% 
             mutate(cut  = cut(value,4,labels= FALSE))
-        
-        df %>% 
+        df <- df %>% 
             left_join(acsbreaks %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
-            filter(OWNER_DEPARTMENT == input$dep) %>% 
+            filter(OWNER_DEPARTMENT == input$dep)
+        
+        if ((1 %in% unique(df$cut)) | (4 %in% unique(df$cut))) {
+            
+            cond_plot <- df %>%  
             filter(cut %in% c(1,4)) %>% 
             group_by(SR_TYPE,cut) %>%
             summarize(n = mean(daystoclose[OWNER_DEPARTMENT == input$dep])) %>%
             mutate(cut = ifelse(cut == 1,"Bottom 25 percent","Top 25 percent")) %>%
             ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = cut))+
             geom_col()+
-            facet_wrap(~cut)+
+            facet_wrap(~cut, labeller = labeller(cut = c("Bottom 25%" = "Number of Requests for Zip Codes\n below the 25th Percentile", 
+                                                         "Top 25%" = "Number of Requests for Zip Codes\n above the 75th Percentile")))+
             theme_bw()+
             theme(legend.position = "none", strip.background = element_blank())+
             labs(
-                title=paste("311 Response Time for Each Request Type In",input$dep),
-                subtitle = paste("By the top and bottom quartile of",input$demo,"population share"),
+                title=paste(input$dep, 
+                            "Average Request Time for Zip Codes in\n Top and Bottom Quartiles of",
+                            input$demo, 
+                            "Population Percentage"),
                 y="",
-                x="Response Time in Days",
+                x="Response Time (Days)",
                 
             )+scale_fill_manual(values = c("red4","dodgerblue4"))
+            }
+        
+        if (!(1 %in% unique(df$cut)) & !(4 %in% unique(df$cut))) {
+            
+            cond_plot <- df %>% 
+                mutate(PEdist = ifelse(value >= 0.5, 1, 0)) %>%
+                group_by(SR_TYPE,PEdist) %>%
+                summarize(n = mean(daystoclose[OWNER_DEPARTMENT == input$dep])) %>%
+                mutate(Half = ifelse(PEdist == 0,"Bottom 50%","Top 50%")) %>%
+                ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = factor(Half)))+
+                geom_col()+
+                facet_wrap(~Half, labeller = labeller(Half = c("Bottom 50%" = "Sociodemographic distribution below 50%", 
+                                                               "Top 50%" = "Sociodemographic distribution above 50%")))+
+                theme_bw()+
+                theme(legend.position = "none", strip.background = element_blank())+
+                labs(
+                    title=paste(input$dep, 
+                                "Average Request Time for Zip Codes in\n Above or Below 50% of",
+                                input$demo, 
+                                "Population Percentage"),
+                    y="",
+                    x="Request Volume",
+                    
+                )+scale_fill_manual(values = c("red4","dodgerblue4"))
+        }
+        
+        cond_plot
     })
     
     #======================================
@@ -444,12 +423,24 @@ server <- function(input, output) {
     
     # Generate an HTML table view of the data ----
     output$data <- renderTable({
-        head(df)
+        df %>%
+            rename("Service Request Number" = SR_NUMBER,
+                   "Service Request Type" = SR_TYPE,
+                   "Department" = OWNER_DEPARTMENT,
+                   "Date Created" = CREATED_DATE,
+                   "Date Closed" = CLOSED_DATE,
+                   "Zip Code" = ZIP,
+                   "Year" = YEAR,
+                   "Hour Created" = CREATED_HOUR,
+                   "Day of Week Created" = CREATED_DAY_OF_WEEK,
+                   "Month created" = CREATED_MONTH,
+                   "Days until Completed" = daystoclose) %>%
+            head()
     })
     
     # Generate a summary content ----
     output$data2text <- renderPrint({
-        HTML(paste(h1("Socio-Demographic Characteristics Data"),
+        HTML(paste(h1("Sociodemographic Characteristics Data"),
                    br(),
                    p("The American Community Survey (ACS) is a questionnaire conducted by the United States Census Bureau yearly to collect information about American citizens. Relevant sociodemographic elements were selected from this survey in the year 2019, and converted into a workable dataset using `tidyCensus`. Our subset of data includes 24 columns and 296 rows correlating to Chicago and other outlying areas included in the Chicago Metropolitan Statistical Area (MSA). Only zip codes included in the Chicago 311 dataset will be selected from this dataset."),
                    br()
@@ -459,7 +450,16 @@ server <- function(input, output) {
     
     # Generate an HTML table view of the data ----
     output$data2 <- renderTable({
-        acs %>% filter(GEOID %in% unique(df$ZIP))
+        acs %>% 
+            filter(GEOID %in% unique(df$ZIP)) %>%
+            rename("Census Tract" = Tract,
+                   "Gini Index" = GiniE,
+                   "Public Assistance" = pubasst,
+                   "No Public Assitance" = nopubasst,
+                   "No College Education" = NoCollege,
+                   "College Educated" = College,
+                   "Under 18" = Under18) %>%
+            head()
     })
     
 }
