@@ -54,7 +54,7 @@ The visuals show that the volume and response time for various requests type gen
 
 ## Repository Organization
 
-  - [Data](Data)
+  - [Data](Data/)
       - Demographic data from the ACS via `tidycensus`
       - 311 data
   - [Presentation](Presentation/README.md)
