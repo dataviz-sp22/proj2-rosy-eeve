@@ -77,7 +77,7 @@ ui <- fluidPage(
             br(),
             
             # Input: Choose demo variable
-            selectInput(inputId = "demo", label = "Socio-Demographic characteristics - Select a variable:",
+            selectInput(inputId = "demo", label = "Sociodemographic characteristics - Select a variable:",
                          #choiceValues = names(acs[,-c(1:2)]),
                          selected = names(acs[,3]),
                          choices = c("Race & Ethinicity: White"="White",
@@ -114,7 +114,7 @@ ui <- fluidPage(
                         #tabPanel("Plot", plotOutput("plot"), plotOutput("plot2"), plotOutput("plot3")),
                         tabPanel("Request Volume",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plot"), plotOutput("plot2"))),
                                  plotOutput("plot4")),
-                        tabPanel("Response Time",fluidRow(splitLayout(cellWidths = c("50%", "50%"), plotOutput("plotb"), plotOutput("plot2b"))),
+                        tabPanel("Response Time",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plotb"), plotOutput("plot2b"))),
                                  plotOutput("plot4b")),
                         tabPanel("Data", htmlOutput("datatext"),tableOutput("data"),htmlOutput("data2text"), tableOutput("data2")),
                         tabPanel("About", htmlOutput("about"))
@@ -149,7 +149,7 @@ server <- function(input, output) {
                        by=c("name"="ZIP")) %>%
             ggplot(aes(fill = n))+
             labs(
-                title = paste("311 Request Volume per Zip Code:\n",input$dep),
+                title = paste(input$dep, "Request Volume\n by Chicago Zip Code"),
                 fill = "Request\nVolume"
                 )+
             geom_sf()+
@@ -174,7 +174,7 @@ server <- function(input, output) {
             geom_sf()+
             labs(
                 title = paste("Population Share of \nSociodemographic variable:",input$demo),
-                subtitle = "in Chicago",
+                subtitle = "by Chicago Zip Code",
                 fill = input$demo, 
             )+
             scale_fill_continuous_sequential("Mako")+
@@ -211,30 +211,59 @@ server <- function(input, output) {
     # Generate a plot of the data ----
     output$plot4 <- renderPlot({
 
-        acsbreaks = acsmelt %>% 
+        acsbreaks <- acsmelt %>% 
             filter(GEOID %in% unique(df$ZIP)) %>%
             group_by(variable) %>% 
             mutate(cut  = cut(value,4,labels= FALSE))
-        
-        df %>% 
+        df <- df %>% 
             left_join(acsbreaks %>% filter(variable == input$demo),by=c("ZIP"="GEOID")) %>% na.omit() %>%
-            filter(OWNER_DEPARTMENT == input$dep) %>% 
+            filter(OWNER_DEPARTMENT == input$dep)
+        
+        if ((1 %in% unique(df$cut)) & (4 %in% unique(df$cut))) {
+            
+            cond_plot <- df %>% 
             filter(cut %in% c(1,4)) %>% 
             group_by(SR_TYPE,cut) %>%
             count() %>% 
             mutate(cut = ifelse(cut == 1,"Bottom 25%","Top 25%")) %>%
             ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = cut))+
             geom_col()+
-            facet_wrap(~cut)+
+            facet_wrap(~cut, labeller = labeller(cut = c("Bottom 25%" = "Requests for Zip Codes below the 25th Percentile", 
+                                                         "Top 25%" = "Requests for Zip Codes above the 75th Percentile")))+
             theme_bw()+
             theme(legend.position = "none", strip.background = element_blank())+
             labs(
-                title=paste("311 Request Volume for Each Request Type In",input$dep),
+                title=paste("311 Request Volume by Chicago Zip Code for variable:\n",input$dep),
                 subtitle = paste("By the top and bottom quartile of",input$demo,"population share"),
                 y="",
                 x="Request Volume",
                 
             )+scale_fill_manual(values = c("red4","dodgerblue4"))
+        }
+        
+        if (!(1 %in% unique(df$cut)) & !(4 %in% unique(df$cut))) {
+            
+            cond_plot <- df %>% 
+                mutate(PEdist = ifelse(value >= 0.5, 1, 0)) %>%
+                group_by(SR_TYPE,PEdist) %>%
+                count() %>% 
+                mutate(cut = ifelse(PEdist == 0,"Bottom 50%","Top 50%")) %>%
+                ggplot(aes(y = reorder(SR_TYPE,n),x = n,fill = factor(PEdist)))+
+                geom_col()+
+                facet_wrap(~cut, labeller = labeller(cut = c("Bottom 50%" = "Sociodemographic distribution below 50%", 
+                                                             "Top 50%" = "Sociodemographic distribution above 50%")))+
+                theme_bw()+
+                theme(legend.position = "none", strip.background = element_blank())+
+                labs(
+                    title=paste("311 Request Volume by Chicago Zip Code for variable:\n",input$dep),
+                    subtitle = paste("By the top and bottom quartile of",input$demo,"population share"),
+                    y="",
+                    x="Request Volume",
+                    
+                )+scale_fill_manual(values = c("red4","dodgerblue4"))
+        }
+        
+            cond_plot
     })
     #======================================
     # Response Time
@@ -250,12 +279,17 @@ server <- function(input, output) {
                        by=c("name"="ZIP")) %>%
             ggplot(aes(fill = n))+
             labs(
-                title = paste("Choropleths of 311 Response Time:",input$dep),
-                fill = "Response Time in Days"
+                title = paste(input$dep, "Request Response\n Time by Chicago Zip Code"),
+                fill = "Days until\n Response"
             )+
             geom_sf()+
             scale_fill_continuous_sequential("SunsetDark")+
-            theme_bw()
+            theme_bw()+
+            theme(legend.position = c(0.2, 0.2),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  axis.line = element_line(),
+                  axis.ticks = element_line())
     })
     
     # Generate a plot of the data ----
@@ -269,11 +303,16 @@ server <- function(input, output) {
             ggplot(aes(fill = value))+
             geom_sf()+
             labs(
-                title = paste("Choropleths of Population Share for",input$demo),
+                title = paste("Population Share of \nSociodemographic variable:",input$demo),
                 fill = input$demo, 
             )+
             scale_fill_continuous_sequential("Mako")+
-            theme_bw()
+            theme_bw()+
+            theme(legend.position = c(0.2, 0.2),
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  axis.line = element_line(),
+                  axis.ticks = element_line())
     })
     
     
