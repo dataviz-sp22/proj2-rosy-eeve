@@ -345,6 +345,15 @@ server <- function(input, output) {
                    br(),
                    p("For demographic characteristics, we use data from The American Community Survey (ACS) that is a questionnaire conducted by the United States Census Bureau yearly to collect information about American citizens. Relevant sociodemographic elements were selected from this survey in the year 2019 and converted into a workable dataset using tidyCensus. Our subset of data includes 24 columns and 296 rows correlating to Chicago and other outlying areas included in the Chicago Metropolitan Statistical Area (MSA). We limit the data to observations with zip codes that match with the zip codes included in Chicago 311 dataset. Among the selected variables include factors relevant to race, education, age, gender, and socioeconomic status. While the already selected variables are robust, the many questions included in the original survey allow for us to add or reduce the number of variables included as necessary. See the [codebook](Data/ACS2019_codebook.csv) in the data folder for all variables of interest."),
                    br(),
+                   h2("Approach:"),
+                   br(),
+                   p("We believe that spatial visualizations are best suited to examine volume of different 311 service request types, response time to address those requests and varying sociodemographic characteristics across different areas of Chicago. To aid in illustrating the characteristics of a selected service domain, we use additional basic ggplot2 visualizations i.e., bar charts to show the distribution of different request types within a domain/department for the top and bottom quartile of the selected demographic group. Switching to a different demographic group updates these bar charts along with the choropleth for the share of the selected sociodemographic group in different areas."),
+                   br(),
+                   p("This helps to show the relation between the department with initial responsibility for the service request or service type and socioeconomic indicators. For example, there is a positive correlation between influx of a DOB – Building service request and the share of native population. The bar charts help look at this relation in a clearer way as we can see the volume and request time for each request type for both the top and bottom quartile of selected characteristic. The comparison becomes much easier and detailed."),
+                   br(),
+                   p("We add an element of interactivity to this analysis using Shiny app. The app provides the feature to toogle certain categories of service requests, as well as select a community area in order to see the distribution of service requests and the demographic patterns associated with the frequency of requests in the area."),
+                   br(),
+                   p(),
                    
         ))
     })
