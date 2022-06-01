@@ -42,71 +42,71 @@ zipcode = st_read("ma_zip_shapefile/acs2020_5yr_B01003_86000US60140.shp")
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-    
-    # App title ----
-    titlePanel("How do 311 non-emergency requests differ across zipcodes in Chicago?"),
-    
-    # Sidebar layout with input and output definitions ----
-    sidebarLayout(
-        
-        # Sidebar panel for inputs ----
-        sidebarPanel(
-            
-            # Input: Choose a department type
-            radioButtons("dep", "311 Characteristics - Select a department:",
-                        sort(unique(df$OWNER_DEPARTMENT)),
-                        selected = sort(unique(df$OWNER_DEPARTMENT))[10]
-            ),
-            
-            # br() element to introduce extra vertical spacing ----
-            br(),
-            
-            # Input: Choose demo variable
-            selectInput(inputId = "demo", label = "Sociodemographic characteristics - Select a variable:",
-                         #choiceValues = names(acs[,-c(1:2)]),
-                         selected = names(acs[,3]),
-                         choices = c("Race & Ethinicity: White"="White",
-                                         "Race & Ethinicity: Black"="Black",
-                                         "Race & Ethinicity: Native"="Native",
-                                         "Race & Ethinicity: Asian"="Asian", 
-                                         "Race & Ethinicity: HIPI"="HIPI",  
-                                         "Race & Ethinicity: Hispanic"="Hispanic",  
-                                         "Income: Gini Index"="GiniE", 
-                                         "Income: Public Assistance"="pubasst",  
-                                         "Income: No Public Assistance"="nopubasst", 
-                                         "Education: No College"="NoCollege",
-                                         "Education: College"="College",
-                                         "Age: Under 18"="Under18", 
-                                         "Age: 18 to 24"="18t24", 
-                                         "Age: 25 to 34"="25t34", 
-                                         "Age: 35 to 44"="35t44", 
-                                         "Age: 45 to 54"="45t54", 
-                                         "Age: 55 to 64"="55t64", 
-                                         "Age: 65 to 74"="65t74", 
-                                         "Age: 75 over"="75over",
-                                         "Sex: Female"="Female",
-                                         "Sex: Male"="Male")
-            ),
-            
-        ),
-        
-        # Main panel for displaying outputs ----
-        mainPanel(
-            
-            # Output: Tabset w/ plot, summary, and table ----
-            tabsetPanel(type = "tabs",
-                        tabPanel("Request Volume",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plot"), plotOutput("plot2"))),
-                                 plotOutput("plot4")),
-                        tabPanel("Response Time",fluidRow(splitLayout(cellWidths = c("49%", "49%"), plotOutput("plotb"), plotOutput("plot2b"))),
-                                 plotOutput("plot4b")),
-                        tabPanel("Data", htmlOutput("datatext"),tableOutput("data"),htmlOutput("data2text"), tableOutput("data2")),
-                        tabPanel("About", htmlOutput("about"))
-            )
-            
-        )
-    )
-)
+ui <- navbarPage("311 Service Request Trends",
+                 tabPanel('Visualizations', fluidPage(
+                     # Theme ----
+                     theme = shinythemes::shinytheme("united"),
+                     # App title ----
+                     titlePanel("How do 311 non-emergency requests differ across zipcodes in Chicago?"),
+                     # Sidebar layout with input and output definitions ----
+                     sidebarLayout(
+                         # Sidebar panel for inputs ----
+                         sidebarPanel(
+                             # Input: Choose a department type
+                             radioButtons("dep", "311 Requests - Select a department:",
+                                          sort(unique(df$OWNER_DEPARTMENT)),
+                                          selected = sort(unique(df$OWNER_DEPARTMENT))[10]
+                                          ),
+                             # br() element to introduce extra vertical spacing ----
+                             br(),
+                             # Input: Choose demo variable
+                             selectInput(inputId = "demo", 
+                                         label = "Sociodemographic characteristics - Select a variable:",
+                                         selected = names(acs[,3]),
+                                         choices = c("Race & Ethinicity: White"="White",
+                                                     "Race & Ethinicity: Black"="Black",
+                                                     "Race & Ethinicity: Native"="Native",
+                                                     "Race & Ethinicity: Asian"="Asian", 
+                                                     "Race & Ethinicity: HIPI"="HIPI",  
+                                                     "Race & Ethinicity: Hispanic"="Hispanic",  
+                                                     "Income: Gini Index"="GiniE", 
+                                                     "Income: Public Assistance"="pubasst",  
+                                                     "Income: No Public Assistance"="nopubasst", 
+                                                     "Education: No College"="NoCollege",
+                                                     "Education: College"="College",
+                                                     "Age: Under 18"="Under18", 
+                                                     "Age: 18 to 24"="18t24", 
+                                                     "Age: 25 to 34"="25t34", 
+                                                     "Age: 35 to 44"="35t44", 
+                                                     "Age: 45 to 54"="45t54", 
+                                                     "Age: 55 to 64"="55t64", 
+                                                     "Age: 65 to 74"="65t74", 
+                                                     "Age: 75 over"="75over",
+                                                     "Sex: Female"="Female",
+                                                     "Sex: Male"="Male")
+                                         ),
+                             ),
+                         # Main panel for displaying outputs ----
+                         mainPanel(
+                             # Output: Tabset w/ plot, summary, and table ----
+                             tabsetPanel(type = "tabs",
+                                         tabPanel("Request Volume",
+                                                  fluidRow(splitLayout(cellWidths = c("49%", "49%"), 
+                                                                       plotOutput("plot"), 
+                                                                       plotOutput("plot2"))),
+                                                  plotOutput("plot4")),
+                                         tabPanel("Response Time",fluidRow(splitLayout(cellWidths = c("49%", "49%"), 
+                                                                                       plotOutput("plotb"), 
+                                                                                       plotOutput("plot2b"))),
+                                                  plotOutput("plot4b"))
+                                         )
+                             )
+                         )
+                     )
+                     ),
+                 tabPanel("Dataset", htmlOutput("datatext"),tableOutput("data"),htmlOutput("data2text"), tableOutput("data2")),
+                 tabPanel("About this App", htmlOutput("about"))
+                 )
 
 # Define server logic for random distribution app ----
 server <- function(input, output) {
@@ -140,7 +140,7 @@ server <- function(input, output) {
             geom_sf()+
             scale_fill_continuous_sequential("SunsetDark")+
             theme_bw() +
-            theme(legend.position = c(0.2, 0.2),
+            theme(legend.position = c(0.2, 0.3),
                   panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank(),
                   axis.line = element_line(),
@@ -164,7 +164,7 @@ server <- function(input, output) {
             )+
             scale_fill_continuous_sequential("Mako")+
             theme_bw() +
-            theme(legend.position = c(0.2, 0.2),
+            theme(legend.position = c(0.2, 0.3),
                   panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank(),
                   axis.line = element_line(),
@@ -254,7 +254,7 @@ server <- function(input, output) {
             geom_sf()+
             scale_fill_continuous_sequential("SunsetDark")+
             theme_bw()+
-            theme(legend.position = c(0.2, 0.2),
+            theme(legend.position = c(0.2, 0.3),
                   panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank(),
                   axis.line = element_line(),
@@ -278,7 +278,7 @@ server <- function(input, output) {
             )+
             scale_fill_continuous_sequential("Mako")+
             theme_bw()+
-            theme(legend.position = c(0.2, 0.2),
+            theme(legend.position = c(0.2, 0.3),
                   panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank(),
                   axis.line = element_line(),
