@@ -240,7 +240,7 @@ the limited data.
     -   Demographic data from the ACS via `tidycensus`
     -   311 data
 -   [Proposal](Proposal/README.md)
--   [App](./Data)
+-   [App](./App)
 
 ## Citations
 
